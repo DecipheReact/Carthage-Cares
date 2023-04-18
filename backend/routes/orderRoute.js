@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router()
 const {addOrderItems,getOrderById,updateOrderToPaid, getOrders,updateOrderToDelivered, 
     getProductUsersIdByOrderId, getProductUsersIdByUserId,OrderApprove,OrderNotApprove,
-    getProductsOrderByIdOrder} 
+    getProductsOrderByIdOrder,
+    getProductsDashboard} 
     =require ('../Controllers/orderController.js')
 const { protectSimpleUser,validator,isAdmin,isCoach }= require('../Middelware/userMiddelware.js')
 
@@ -17,5 +18,7 @@ router.delete('/NotapproveOrder/:id',OrderNotApprove)
 router.get('/getOrderOwner/:id',getProductUsersIdByOrderId)
 router.get('/getOrderbyIdUser/:userId',getProductUsersIdByUserId)
 router.put('/:id/deliver',protectSimpleUser,isCoach,updateOrderToDelivered)
+router.get('/dashboard/:id/:userId',getProductsDashboard)
+
 
 module.exports = router

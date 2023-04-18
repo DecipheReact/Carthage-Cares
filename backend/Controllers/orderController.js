@@ -250,6 +250,46 @@ const getProductsOrderByIdOrder = asyncHandler(async (req, res) => {
   }
 
  })
+ 
+//order dashboard
+const getProductsDashboard = asyncHandler(async (req, res) => {
+  
+  const user = await User.findById(req.params.userId);
+
+  if (!user) {
+    res.status(404);
+    throw new Error('User not found');
+  }
+
+ const order = await Order.findById(req.params.id).populate({
+  path: 'orderItems',
+  populate: {
+    path: 'product',
+    model: 'Product',
+    select: 'productName imageProduct countInStock category price id',
+    match: { user: req.params.userId }
+  },
+  match: { user: req.params.userId }
+});
+
+if (order && user) {
+  const filteredItems = order.orderItems.filter(item => item.product);
+    const productDetails = filteredItems.map(item => ({
+      productName: item.product.productName,
+      id: item.product.id,
+      imageProduct: item.product.imageProduct,
+      countInStock: item.product.countInStock,
+      category: item.product.category,
+      price: item.product.price,
+      qty: item.qty,
+    }));
+
+  res.json(productDetails);
+} else {
+  res.status(404);
+  throw new Error('Order not found');
+}
+});
 
 module.exports = {
   addOrderItems, getOrderById, updateOrderToPaid,
@@ -259,5 +299,6 @@ module.exports = {
   OrderApprove
   ,
   OrderNotApprove,
-  getProductsOrderByIdOrder
+  getProductsOrderByIdOrder,
+  getProductsDashboard
 }

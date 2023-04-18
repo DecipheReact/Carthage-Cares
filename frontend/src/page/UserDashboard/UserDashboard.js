@@ -5,13 +5,19 @@ import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import SpecialButton from "../../Components/Button/button";
 import { useDispatch , useSelector , } from "react-redux";
 import { productadd,deleteProduct } from "../../productredux/productaction";
-import {getOrderByIdAndUserId, approveOrder ,UnapproveOrder} from '../../orderRedux/orderActions';
+import {getOrderByIdAndUserId, approveOrder ,UnapproveOrder, getDetailsDashboardProductsOrder} from '../../orderRedux/orderActions';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import Loader from "../../Components/Loader";
 import { useNavigate } from 'react-router-dom';
 import { Link, useParams } from 'react-router-dom';
 import { TablePagination  } from '@material-ui/core';
+import {  Table, TableHead, TableRow, TableCell, TableBody,Typography } from '@material-ui/core';
+import { Button } from 'react-bootstrap';
 
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
 
 import Swal from 'sweetalert2';
 
@@ -55,6 +61,18 @@ function UserDashboard(){
               dispatch(deleteProduct(id));
           
         };
+        
+//details 
+
+const [openDialog, setOpenDialog] = React.useState(false);
+const selectedOrderItems = useSelector((state) => state.orderProductDashboard.products);
+const handleOpenDialog = (id,order) => {
+  dispatch(getDetailsDashboardProductsOrder(userInfo._id, order._id));
+  console.log("id user :" , id);
+  console.log("id order :" , order._id);
+  setOpenDialog(true);
+};
+//end details
 
         
         const handleRefresh = () => {
@@ -270,56 +288,102 @@ const submitHandlerj = (e) => {
                       <p style={{color : 'black'}}> {order.statusOrder ? 'Approved' : 'Not approved'}</p>
                     </td>
                     <td>
-                    {order.statusOrder === false ? (
-                        <button onClick={() => {
-                          Swal.fire({
-                            title: 'Do you want to Approve this Order?',
-                            showDenyButton: true,
-                            showCancelButton: true,
-                            confirmButtonText: 'Approve',
-                            denyButtonText: `Don't Approve`,
-                          }).then((result) => {
-                            if (result.isConfirmed ) {
-                              handleApprove(order._id);
-                              handleRefreshOrder();
-                              // listOrders();
-                              Swal.fire('Order Approved!', '', 'success');
-                            } else if (result.isDenied) {
-                              Swal.fire('Course is not Approved', '', 'info');
-                            }
-                          });
-                        }}>Approve</button>
-                      ) : (
-                        <button onClick={() => {
-                          Swal.fire({
-                            title: 'Do you want to Not Approve this Order?',
-                            showDenyButton: true,
-                            showCancelButton: true,
-                            confirmButtonText: 'Not Approve',
-                            denyButtonText: `Cancel`,
-                          }).then((result) => {
-                            if (result.isConfirmed ) {
-                              handleUnapprove(order._id);
-                              handleRefreshOrder();
-                              Swal.fire('Order Not Approved!', '', 'success');
-                            } else if (result.isDenied) {
-                              Swal.fire('Cancelled', '', 'info');
-                            }
-                          });
-                        }}>Not Approve</button>
-                      )}
+  {!order.statusOrder && (
+    <button
+      onClick={() => {
+        Swal.fire({
+          title: 'Do you want to Approve this Order?',
+          showDenyButton: true,
+          showCancelButton: true,
+          confirmButtonText: 'Approve',
+          denyButtonText: `Don't Approve`,
+        }).then((result) => {
+          if (result.isConfirmed) {
+            handleApprove(order._id);
+            handleRefreshOrder();
+            Swal.fire('Order Approved!', '', 'success');
+          } else if (result.isDenied) {
+            Swal.fire('Course is not Approved', '', 'info');
+          }
+        });
+      }}
+    >
+      Approve
+    </button>
+  )}
+</td>
 
-                                
-
+                    <td>
+                           
+<Button style={{ fontSize: 'smaller', marginLeft:'10px' }} onClick={() => handleOpenDialog(userInfo._id, order)}>
+                                    Details
+                                  </Button>
                     </td>
                     
                   </tr>
                 )
               })}
             </table> 
+            
             ) : (
               <p>You have no orders.</p>
             )}
+              <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+            <DialogTitle style={{ backgroundColor: '#b3b3b3' ,fontWeight: 'bold', fontSize: '1.2rem', paddingBottom: '0.5rem' }}>
+            <Typography variant="h6" style={{ color: '#fff' }}>Order Items</Typography>
+                  </DialogTitle>
+
+  <DialogContent>
+  <Table>
+  <TableHead style={{  }}>
+    <TableRow>
+      <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold' }}> 
+      </TableCell>
+      <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold' ,backgroundColor: '#d9d9d9', color: '#fff'}}>
+        <Typography  style={{ color: '#fff' }}>Product Name</Typography>
+      </TableCell>
+      <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold' ,backgroundColor: '#d9d9d9', color: '#fff' }}>
+        <Typography  style={{ color: '#fff' }}>Category</Typography>
+      </TableCell>
+      <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold' ,backgroundColor: '#d9d9d9', color: '#fff' }}>
+        <Typography  style={{ color: '#fff' }}>Quantity</Typography>
+      </TableCell>
+      <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold', backgroundColor: '#d9d9d9', color: '#fff' }}>
+  <Typography style={{ color: '#fff' }}>Delete</Typography>
+</TableCell>
+
+    </TableRow>
+  </TableHead>
+
+  <TableBody>
+  {selectedOrderItems &&
+  selectedOrderItems.map((orderItem) => (
+    <TableRow key={orderItem._id}>
+      <TableCell>
+        <img style={{width:"70px",height:"auto"}} src={`${process.env.PUBLIC_URL}/images/${orderItem.imageProduct}`} alt="My Image" className="song_cover" />
+      </TableCell>
+      <TableCell>{orderItem.productName}</TableCell>
+      <TableCell>{orderItem.category}</TableCell>
+      <TableCell>{orderItem.qty}</TableCell>
+      <TableCell>
+  <Button
+    variant="contained"
+    color="secondary"
+  >
+    Delete
+  </Button>
+</TableCell>
+    </TableRow>
+))}
+
+  </TableBody>
+</Table>
+
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenDialog(false)}>Close</Button>
+  </DialogActions>
+</Dialog>
                   {  <TablePagination
                 rowsPerPageOptions={[5, 10, 25]} 
                 component="div"
@@ -333,145 +397,7 @@ const submitHandlerj = (e) => {
                 }}
               /> }
 
-{/* <div>
-<div className="library_album" >
-    <h3>Approved Orders </h3>
-    </div>
-    <TablePagination
-      rowsPerPageOptions={[5, 10, 25]} 
-      component="div"
-      count={approvedOrders.length}
-      rowsPerPage={rowsPerPage}
-      page={pageApproved}
-      onChangePage={(event, newPage) => setPageApproved(newPage)}
-      onChangeRowsPerPage={(event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPageApproved(0);
-      }}
-    />
-    <table>
-      {approvedOrders.slice(pageApproved * rowsPerPage, pageApproved * rowsPerPage + rowsPerPage).map((order, index) => {
-        return (
-          <tr key={order.id}>
-            <td>
-              <p>{index + 1}</p>
-            </td>
-            <td className="song"> 
-              <h4>DATE </h4>
-              <p>{order.createdAt.substring(0, 10)}</p>
-            </td>
-            <td style={{ marginRight : '50px'}}>
-              <h4 className="song"> TOTAL </h4>
-              <p style={{color : 'black'}}>${order.totalPrice.toFixed(2)}</p>
-            </td>
-            <td>
-              <h4  className="song"> PAID</h4>
-              <p style={{color : 'black'}}>{order.isPaid ? order.paidAt.substring(0, 10) : 'No'}</p>
-            </td>
-            <td>
-              <h4 className="song">DELIVERED</h4>
-              <p style={{color : 'black'}}>{order.isDelivered ? order.deliveredAt.substring(0, 10) : 'No'}</p>
-            </td>
-            <td>
-              <h4 className="song">Status</h4>
-              <p style={{color : 'black'}}>Approved</p>
-            </td>
-            <td>
-              <button onClick={() => {
-                Swal.fire({
-                  title: 'Do you want to Not Approve this Order?',
-                  showDenyButton: true,
-                  showCancelButton: true,
-                  confirmButtonText: 'Not Approve',
-                  denyButtonText: `Cancel`,
-                }).then((result) => {
-                  if (result.isConfirmed ) {
-                    handleUnapprove(order._id);
-                    handleRefreshOrder();
-                    Swal.fire('Order Not Approved!', '', 'success');
-                  } else if (result.isDenied) {
-                    Swal.fire('Cancelled', '', 'info');
-                  }
-                });
-              }}>Not Approve</button>
-            </td>
-          </tr>
-        );
-      })}
-    </table>
   
-    
-    <hr style={{ border: "1px solid #ddd" }} />
-    
-    <div className="library_album" >
-    <h3>Unapproved Orders </h3>
-    </div>
-
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]} 
-        component="div"
-        count={unapprovedOrders.length}
-        rowsPerPage={rowsPerPage}
-        page={pageUnapproved}
-        onChangePage={(event, newPage) => setPageUnapproved(newPage)}
-        onChangeRowsPerPage={(event) => {
-          setRowsPerPage(parseInt(event.target.value, 10));
-          setPageUnapproved(0);
-        }}
-      />
-    <table>
-      {unapprovedOrders.slice(pageUnapproved * rowsPerPage, pageUnapproved * rowsPerPage + rowsPerPage).map((order, index) => {
-        return (
-          <tr key={order.id}>
-            <td>
-              <p>{index + 1}</p>
-            </td>
-            <td className="song"> 
-              <h4>DATE </h4>
-              <p>{order.createdAt.substring(0, 10)}</p>
-            </td>
-            <td style={{ marginRight : '50px'}}>
-              <h4 className="song"> TOTAL </h4>
-              <p style={{color : 'black'}}>${order.totalPrice.toFixed(2)}</p>
-            </td>
-            <td>
-              <h4  className="song"> PAID</h4>
-              <p style={{color : 'black'}}>{order.isPaid ? order.paidAt.substring(0, 10) : 'No'}</p>
-            </td>
-            <td>
-              <h4 className="song">DELIVERED</h4>
-              <p style={{color : 'black'}}>{order.isDelivered ? order.deliveredAt.substring(0, 10) : 'No'}</p>
-            </td>
-            <td>
-              <h4 className="song">Status</h4>
-              <p style={{color : 'black'}}>Not Approved</p>
-            </td>
-            <td>
-              <button onClick={() => {
-                Swal.fire({
-                  title: 'Do you want to  Approve this Order?',
-                  showDenyButton: true,
-                  showCancelButton: true,
-                  confirmButtonText: ' Approve',
-                  denyButtonText: `Cancel`,
-                }).then((result) => {
-                  if (result.isConfirmed ) {
-                    handleApprove(order._id);
-                    handleRefreshOrder();
-                    Swal.fire('Order  Approved!', '', 'success');
-                  } else if (result.isDenied) {
-                    Swal.fire('Cancelled', '', 'info');
-                  }
-                });
-              }}> Approve</button>
-            </td>
-          </tr>
-        );
-      })}
-    </table>
-    
-  </div> */}
-                     
 
           </div>
 
