@@ -24,7 +24,9 @@ const UpdateProduct = () => {
     const [imageProduct,setImageProduct]=useState("");
  const [successUpdateLink, setSuccessUpdateLink] = useState(false);
 
+
     const [showCreate, setShowCreate] = useState(false);
+
 
   const dispatch = useDispatch();
 const {
@@ -50,14 +52,10 @@ useEffect(() => {
     setPRod(response.data);
 });
 }, [id]);
-
 console.log(prod);
 
   const submitHandler=async(e)=>{
      e.preventDefault();
-
-
-
       dispatch(
         productUpdate(
          { id, 

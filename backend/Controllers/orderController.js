@@ -300,6 +300,36 @@ if (order && user) {
   throw new Error('Order not found');
 }
 });
+const removeProductFromOrder = asyncHandler(async (req, res) => {
+  const { userId, orderId, productId } = req.params;
+
+  // Find the user and order
+  const user = await User.findById(userId);
+  const order = await Order.findById(orderId);
+
+  // Check if the user and order exist
+  if (!user || !order) {
+    res.status(404);
+    throw new Error('User or order not found');
+  }
+
+  // Remove the product from the order
+  if (order.orderItems && order.orderItems.length > 0) {
+    const index = order.orderItems.findIndex(item => item.product.toString() === productId);
+    if (index !== -1) {
+      order.orderItems.splice(index, 1);
+      await order.save();
+      res.status(200).json({ message: 'Product removed from order' });
+    } else {
+      res.status(404);
+      throw new Error('Product not found in order');
+    }
+  } else {
+    res.status(404);
+    throw new Error('No products found in order');
+  }
+});
+
 
 module.exports = {
   addOrderItems, getOrderById, updateOrderToPaid,
@@ -310,5 +340,6 @@ module.exports = {
   ,
   OrderNotApprove,
   getProductsOrderByIdOrder,
-  getProductsDashboard
+  getProductsDashboard,
+  removeProductFromOrder
 }
