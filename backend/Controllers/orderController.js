@@ -134,41 +134,6 @@ const OrderApprove = asyncHandler(async (req, res) => {
 
 
 
-const OrderNotApprove = asyncHandler(async (req, res) => {
-  // const order = await Order.findById(req.params.id)
-
-  // if (order) {
-  //   console.log('order to delete : ', order)
-  //   await order.remove();
-  //   res.json('Order removed succefully')
-  // } else {
-  //   res.status(404)
-  //   throw new Error('Order not found')
-  // }
-
-  try {
-    const order = await Order.findById(req.params.id)
-  if (order) {
-    console.log('order to delete : ', order)
-    await order.remove();
-    res.json({
-      success:true,
-      message:'Order removed succefully'
-    })
-  } else {
-    res.status(400)
-    throw new Error('Order not found')
-  }
-  } catch (error) {
-    res.send({
-      success:false,
-      message:error.message
-    })
-  }
-});
-
-
-
 
 // @desc    Update order to paid
 // @route   PUT /api/orders/:id/pay
@@ -292,6 +257,7 @@ if (order && user) {
       category: item.product.category,
       price: item.product.price,
       qty: item.qty,
+      idOrder: order._id,
     }));
 
   res.json(productDetails);
@@ -300,6 +266,8 @@ if (order && user) {
   throw new Error('Order not found');
 }
 });
+
+//remove product from order
 const removeProductFromOrder = asyncHandler(async (req, res) => {
   const { userId, orderId, productId } = req.params;
 
@@ -308,9 +276,13 @@ const removeProductFromOrder = asyncHandler(async (req, res) => {
   const order = await Order.findById(orderId);
 
   // Check if the user and order exist
-  if (!user || !order) {
+  if (!user) {
     res.status(404);
-    throw new Error('User or order not found');
+    throw new Error('User  not found');
+  }
+  if (!order) {
+    res.status(404);
+    throw new Error('order not found');
   }
 
   // Remove the product from the order
@@ -338,7 +310,6 @@ module.exports = {
   getProductUsersIdByUserId,
   OrderApprove
   ,
-  OrderNotApprove,
   getProductsOrderByIdOrder,
   getProductsDashboard,
   removeProductFromOrder

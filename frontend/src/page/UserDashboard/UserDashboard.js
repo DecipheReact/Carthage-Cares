@@ -5,7 +5,7 @@ import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
 import SpecialButton from "../../Components/Button/button";
 import { useDispatch , useSelector , } from "react-redux";
 import { productadd,deleteProduct } from "../../productredux/productaction";
-import {getOrderByIdAndUserId, approveOrder ,UnapproveOrder, getDetailsDashboardProductsOrder} from '../../orderRedux/orderActions';
+import {getOrderByIdAndUserId, approveOrder , getDetailsDashboardProductsOrder, removeProductFromOrder} from '../../orderRedux/orderActions';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import Loader from "../../Components/Loader";
 import { useNavigate } from 'react-router-dom';
@@ -49,12 +49,6 @@ function UserDashboard(){
     const orderApprove = useSelector((state) => state.orderApprove);
     const { loading: loadingOrderApprove, error: errorOrderApprove, success: successOrderApprove } = orderApprove;
 
-    const orderUnApprove = useSelector((state) => state.orderUnApprove);
-    const { loading: loadingOrderUnApprove, error: errorOrderUnApprove, success: successOrderUnApprove } = orderUnApprove;
-    
-    
-    const approvedOrders = orders.filter((order) => order.statusOrder);
-    const unapprovedOrders = orders.filter((order) => !order.statusOrder);
 
 
         const deleteHandler = (id) => {
@@ -71,6 +65,15 @@ const handleOpenDialog = (id,order) => {
   console.log("id user :" , id);
   console.log("id order :" , order._id);
   setOpenDialog(true);
+};
+const deleteProductOrder = (id,order,product) => {
+  if (window.confirm('Are you sure you want to delete this product from the order?')) {
+  dispatch(removeProductFromOrder(id, order,product));
+  handleRefreshOrder();
+  console.log("id user :" , id);
+  console.log("id order :" , order);
+  console.log("id product :" , product);
+  }
 };
 //end details
 
@@ -118,11 +121,6 @@ const handleOpenDialog = (id,order) => {
       dispatch(approveOrder(id));
     };
     
-  
-    const handleUnapprove = (id) => {
-      dispatch(UnapproveOrder(id));
-    };
-  
 
  const {
      loading: loadingUpdate,
@@ -339,6 +337,7 @@ const submitHandlerj = (e) => {
     <TableRow>
       <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold' }}> 
       </TableCell>
+      
       <TableCell style={{ fontSize: '1.2rem', fontWeight: 'bold' ,backgroundColor: '#d9d9d9', color: '#fff'}}>
         <Typography  style={{ color: '#fff' }}>Product Name</Typography>
       </TableCell>
@@ -369,6 +368,8 @@ const submitHandlerj = (e) => {
   <Button
     variant="contained"
     color="secondary"
+    onClick={() => deleteProductOrder(userInfo._id, orderItem.idOrder, orderItem.id)}
+
   >
     Delete
   </Button>

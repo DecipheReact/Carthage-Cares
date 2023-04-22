@@ -16,9 +16,6 @@ import {
     ORDER_APPROVE_REQUEST,
      ORDER_APPROVE_SUCCESS, 
      ORDER_APPROVE_FAIL,
-     ORDER_UNAPPROVE_REQUEST, 
-     ORDER_UNAPPROVE_SUCCESS, 
-     ORDER_UNAPPROVE_FAIL,
      PRODUCTS_ORDER_REQUEST,
      PRODUCTS_ORDER_SUCCESS,
      PRODUCTS_ORDER_FAIL,
@@ -294,45 +291,6 @@ export const approveOrder = (orderId) => async (dispatch,getState) => {
     })
   }
 }
-export const UnapproveOrder = (orderId) => async (dispatch,getState) => {
-  try {
-    dispatch({ type: ORDER_UNAPPROVE_REQUEST })
-    const response = await fetch(      `http://localhost:5000/api/orders/NotapproveOrder/${orderId}`,
-
-    {
-      method: 'DELETE',
-      headers: {
-        accept: 'multipart/form-data',
-      }
-    })
-    const {
-      userLogin: { userInfo },
-    } = getState();
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-    const data = await response.json()
-    if (response.ok) {
-      dispatch({
-        type: ORDER_UNAPPROVE_SUCCESS,
-        payload: data
-      })
-    } else {
-      dispatch({
-        type: ORDER_UNAPPROVE_FAIL,
-        payload: data.message
-      })
-    }
-  } catch (error) {
-    dispatch({
-      type: ORDER_UNAPPROVE_FAIL,
-      payload: error.message
-    })
-  }
-}
 
 export const getProductsOrderItemsById = (orderId) => async (dispatch, getState) => {
   try {
@@ -371,5 +329,21 @@ export const getProductsOrderItemsById = (orderId) => async (dispatch, getState)
     } catch (error) {
       dispatch({ type: DASHBOARD_PRODUCTS_ORDER_FAIL, 
         payload: error.message });
+    }
+  };
+
+  export const removeProductFromOrder = (userId, orderId, productId) => async (dispatch) => {
+    try {
+      dispatch({ type: 'REMOVE_PRODUCT_FROM_ORDER_REQUEST' });
+      const { data } = await axios.delete(`http://localhost:5000/api/orders/deleteProduct/${userId}/${orderId}/${productId}`);
+      dispatch({
+        type: 'REMOVE_PRODUCT_FROM_ORDER_SUCCESS',
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: 'REMOVE_PRODUCT_FROM_ORDER_FAILURE',
+        payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+      });
     }
   };
