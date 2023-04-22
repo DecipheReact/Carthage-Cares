@@ -12,10 +12,10 @@ import {
      ORDER_APPROVE_REQUEST, 
      ORDER_APPROVE_SUCCESS, 
      ORDER_APPROVE_FAIL,
-      ORDER_UNAPPROVE_REQUEST,
-       ORDER_UNAPPROVE_SUCCESS, ORDER_UNAPPROVE_FAIL,
        PRODUCTS_ORDER_REQUEST,PRODUCTS_ORDER_SUCCESS,PRODUCTS_ORDER_FAIL, 
-       DASHBOARD_PRODUCTS_ORDER_REQUEST, DASHBOARD_PRODUCTS_ORDER_SUCCESS, DASHBOARD_PRODUCTS_ORDER_FAIL, REMOVE_PRODUCT_FROM_ORDER_REQUEST, REMOVE_PRODUCT_FROM_ORDER_SUCCESS, REMOVE_PRODUCT_FROM_ORDER_FAILURE
+       DASHBOARD_PRODUCTS_ORDER_REQUEST, DASHBOARD_PRODUCTS_ORDER_SUCCESS,
+        DASHBOARD_PRODUCTS_ORDER_FAIL, REMOVE_PRODUCT_FROM_ORDER_REQUEST,
+         REMOVE_PRODUCT_FROM_ORDER_SUCCESS, REMOVE_PRODUCT_FROM_ORDER_FAILURE
     } from './orderConstants.js'
 
 export const orderCreateReducer = (state= {}, action)=>{
@@ -163,19 +163,6 @@ export const orderApproveReducer  = (state = { orders: [] }, action) => {
       return state
   }
 }
-export const orderUnApproveReducer = (state = {}, action) => {
-  switch (action.type) {
-    case ORDER_UNAPPROVE_REQUEST:
-      return { loading: true };
-    case ORDER_UNAPPROVE_SUCCESS:
-      return { loading: false, success: true };
-    case ORDER_UNAPPROVE_FAIL:
-      return { loading: false, error: action.payload };
-    default:
-      return state;
-  }
-};
-
 export const getProductsOrderItemsByIdReducer = (state = { loading: true }, action) => {
   switch (action.type) {
     case PRODUCTS_ORDER_REQUEST:
