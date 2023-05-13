@@ -1,2 +1,3 @@
 # Carthage-Cares
-[![Alt Text](https://img.youtube.com/vi/-oTuL-cmIOc/0.jpg)](https://www.youtube.com/watch?v=-oTuL-cmIOc)
+[![Alt Text]
+![ezgif-4-43ed5998e5](https://github.com/DecipheReact/Carthage-Cares/assets/63017556/85cdcb58-950b-4137-8682-99b347e3ce1b)
